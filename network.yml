@@ -1,6 +1,6 @@
 ---
 - name: Get Network Interfaces Playbook
-  hosts: webservers
+  hosts: all
   tasks:
     - name: Task 1 | Get all the network interfaces with IPAddresses and MAC
       ansible.builtin.debug:
