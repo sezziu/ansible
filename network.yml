@@ -1,9 +1,20 @@
 ---
-- name: Get all network interfaces name
-  hosts: all
-  gather_facts: yes
-
+- name: Get Network Interfaces Playbook
+  hosts: webservers
   tasks:
-  - name: Display all interfaces name
-    debug:
-      var: ansible_facts.interfaces
+    - name: Task 1 | Get all the network interfaces with IPAddresses and MAC
+      ansible.builtin.debug:
+        msg: "interface {{ item }}'s IPAddress is {{ ansible_facts[item]['ipv4']['address']|default(None) }} and MAC is {{ ansible_facts[item]['macaddress']|default(None) }}"
+      with_items:
+      - "{{ ansible_interfaces }}"
+
+    - name: Task 2 | Figure out network device of public network
+      set_fact:
+        public_interface: "{{ hostvars[inventory_hostname]['ansible_' + item]['device'] }}"
+      when:
+        - hostvars[inventory_hostname]['ansible_' + item].ipv4 is defined
+        - hostvars[inventory_hostname]['ansible_' + item]['ipv4']['address'] | ipaddr('180.87.34.99/29')
+      with_items: "{{ ansible_interfaces }}"
+    - name: Task 2 | print public network interface
+      debug:
+        msg: Interface {{ public_interface | default("not") }} found
